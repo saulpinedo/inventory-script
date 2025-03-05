@@ -1,0 +1,65 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mariadb_server:
+    image: mariadb
+    # restart: always
+    container_name: mariadb_server
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dbtest
+      MYSQL_USER: devphp
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/mysql:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    # restart: always
+    ports:
+      - 8080:8080
+
+  mssql:
+    container_name: mssql-db
+    hostname: mssql-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: 'Passw0rd'
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_PID: 'Developer'
+      MSSQL_TCP_PORT: 1433
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./data:/var/opt/mssql/data
+      - ./log:/var/opt/mssql/log
+      - ./secrets:/var/opt/mssql/secrets
+      
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Passw0rd
+      POSTGRES_INITDB_ARGS: "--extensions=vector" # Instala la extensión PGVector
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: redis-server
+    environment:
+      REDIS_PASSWORD: 'Passw0rd'  # Usando la misma contraseña que las demás bases de datos
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "Passw0rd"]
+
+      
